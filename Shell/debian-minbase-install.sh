@@ -113,6 +113,42 @@ E: Bailing Out...
                 unset ____line ____old_IFS
                 exit 1
         fi
+
+
+        # CVE-TBD: ensure the mkpasswd has yescrypt support.
+        if [ "$____line" = "mkpasswd" ]; then
+                # simulate mkpasswd check
+                ____temp="$(printf "%s" "test" \
+                        | mkpasswd --method=yescrypt --stdin \
+                        2> /dev/null
+                )"
+
+                case "$____temp" in
+                '$y$'*)
+                        # all good - accepted
+                        unset ____temp
+                        ;;
+                *)
+                        # reject build from any outdated or incompatible host
+                        # os.
+                        unset ____temp
+                        1>&2 printf -- "%s" "\
+E: The installed 'mkpasswd' does not support 'yescrypt' hashing.
+E:
+E: This usually happens if:
+E:   (1) the 'makepasswd' package is installed instead of 'whois'; AND/OR
+E:   (2) your host's libxcrypt is incompatible or too old.
+E:
+E: This can yield severe security vulnerability for the built image.
+E: WILL NOT PROCEED.
+E: Bailing Out...
+"
+                        IFS="$____old_IFS"
+                        unset ____line ____old_IFS
+                        exit 1
+                        ;;
+                esac
+        fi
 done<<EOF
 blkid
 chroot
@@ -836,6 +872,31 @@ while [ "$TARGET_PASSWORD_USER" = "" ]; do
                 printf -- "%s" "$____password" \
                 | mkpasswd --method=yescrypt --stdin 2> /dev/null \
         )"
+        case "$TARGET_PASSWORD_USER" in
+        '$y$'*)
+                # CVE-TBD: ensure the mkpasswd always have the correct value
+                #          before deployment.
+                # this path means the mkpasswd has already generated a valid
+                # value. All good to proceed.
+                ;;
+        *)
+                # reject install on outdated or incompatible host os.
+                1>&2 printf -- "%s" "\
+E: Failed to create password using 'mkpasswd' with 'yescrypt' support.
+E:
+E: This usually happens if:
+E:   (1) the 'makepasswd' package is installed instead of 'whois'; AND/OR
+E:   (2) your host's libxcrypt is incompatible or too old.
+E:
+E: This can yield severe security vulnerability for the built image.
+E: WILL NOT PROCEED.
+E: Bailing Out...
+
+"
+                exit 1
+                ;;
+        esac
+
         unset ____password ____verify
         break
 done
@@ -898,6 +959,30 @@ while [ "$TARGET_PASSWORD_ROOT" = "" ]; do
                 printf -- "%s" "$____password" \
                 | mkpasswd --method=yescrypt --stdin 2> /dev/null \
         )"
+        case "$TARGET_PASSWORD_ROOT" in
+        '$y$'*)
+                # CVE-TBD: ensure the mkpasswd always have the correct value
+                #          before deployment.
+                # this path means the mkpasswd has already generated a valid
+                # value. All good to proceed.
+                ;;
+        *)
+                # reject install on outdated or incompatible host os.
+                1>&2 printf -- "%s" "\
+E: Failed to create password using 'mkpasswd' with 'yescrypt' support.
+E:
+E: This usually happens if:
+E:   (1) the 'makepasswd' package is installed instead of 'whois'; AND/OR
+E:   (2) your host's libxcrypt is incompatible or too old.
+E:
+E: This can yield severe security vulnerability for the built image.
+E: WILL NOT PROCEED.
+E: Bailing Out...
+"
+                exit 1
+                ;;
+        esac
+
         unset ____password ____verify
         break
 done
