@@ -21,7 +21,7 @@
 
 
 # initialize
-APP_VERSION="1.2.0"
+APP_VERSION="1.2.2"
 
 1>&2 printf -- "%s\n" "\
 (Holloway) Chew, Kean Ho's
@@ -115,7 +115,7 @@ E: Bailing Out...
         fi
 
 
-        # CVE-TBD: ensure the mkpasswd has yescrypt support.
+        # CVE-2026-85649: ensure the mkpasswd has yescrypt support.
         if [ "$____line" = "mkpasswd" ]; then
                 # simulate mkpasswd check
                 ____temp="$(printf "%s" "test" \
@@ -874,9 +874,10 @@ while [ "$TARGET_PASSWORD_USER" = "" ]; do
         )"
         case "$TARGET_PASSWORD_USER" in
         '$y$'*)
-                # CVE-TBD: ensure the mkpasswd always have the correct value
-                #          before deployment.
-                # this path means the mkpasswd has already generated a valid
+                # CVE-2026-85649: ensure the mkpasswd always has the correct
+                # value before deployment.
+                #
+                # This path means the mkpasswd has already generated a valid
                 # value. All good to proceed.
                 ;;
         *)
@@ -961,9 +962,10 @@ while [ "$TARGET_PASSWORD_ROOT" = "" ]; do
         )"
         case "$TARGET_PASSWORD_ROOT" in
         '$y$'*)
-                # CVE-TBD: ensure the mkpasswd always have the correct value
-                #          before deployment.
-                # this path means the mkpasswd has already generated a valid
+                # CVE-2026-85649: ensure the mkpasswd always has the correct
+                # value before deployment.
+                #
+                # This path means the mkpasswd has already generated a valid
                 # value. All good to proceed.
                 ;;
         *)
